@@ -55,7 +55,7 @@ class Calendar():
 
         return calendars['items']
 
-    def insert_event(self, title: str, date: date = None, start_datetime: datetime = None, end_datetime: datetime = None, description: str = None):
+    def insert_event(self, title: str, date: date = None, start_datetime: datetime = None, end_datetime: datetime = None, description: str = None) -> None:
         body: Dict[str, Any] = {}
         body['summary'] = title
 
