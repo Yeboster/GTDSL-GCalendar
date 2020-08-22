@@ -6,8 +6,8 @@ from .authenticate import authenticate
 class Calendar():
     """A wrapper to interact with Google Calendar"""
 
-    def __init__(self, calendar_id: str, timezone: str = None) -> None:
-        self.service = authenticate()
+    def __init__(self, calendar_id: str, pickle_path: str = None, timezone: str = None) -> None:
+        self.service = authenticate(pickle_path)
         self.id = calendar_id
         self.timezone = timezone if timezone else "Europe/Rome"
 
