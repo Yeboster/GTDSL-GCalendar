@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-def authenticate(pickle_path: str = None):
+def authenticate(pickle_path: str = None, credentials_path: str = None):
     """Authenticate and return the api object"""
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
@@ -17,9 +17,11 @@ def authenticate(pickle_path: str = None):
     # time.
     if pickle_path is None:
         pickle_path = 'token.pickle'
+    if credentials_path is None:
+        credentials_path = 'credentials.json'
 
     if os.path.exists(pickle_path):
-        with open('token.pickle', 'rb') as token:
+        with open(pickle_path, 'rb') as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -27,7 +29,7 @@ def authenticate(pickle_path: str = None):
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+                credentials_path, SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
