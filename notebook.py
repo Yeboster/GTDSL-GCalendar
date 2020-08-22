@@ -21,21 +21,21 @@ for cal in calendar.get_calendars():
     if summary.lower() == "primary":
         print(cal)
 
-# # %%
-# # Add a test event at 21/8/2020
-# test_date = date(2020, 8, 21)
-# calendar.insert_event('Test event', date=test_date,
-#                       description="Test description")
-
-# # %%
-# # Add a test event at 21/8/2020 23:00 - 00:00
-# test_startdate = datetime(2020, 8, 21, 23, 0, 0)
-# test_enddate = datetime(2020, 8, 21, 0, 0, 0)
-# calendar.insert_event('Test event', start_datetime=test_startdate, end_datetime=test_enddate,
-#                       description="Test description")
+# %%
+print("Add a test event at 21/8/2020")
+test_date = date(2020, 8, 21)
+calendar.insert_event('Test event', date=test_date,
+                      description="Test description")
 
 # %%
-print("Add time repetition recurring event")
+print("Add a test event at 21/8/2020 23:00 - 00:00")
+test_startdate = datetime(2020, 8, 21, 23, 0, 0)
+test_enddate = datetime(2020, 8, 21, 0, 0, 0)
+calendar.insert_event('Test event', start_datetime=test_startdate, end_datetime=test_enddate,
+                      description="Test description")
+
+# %%
+print("Add time repetition recurring event: 22/8/2020 15-15:30")
 
 test_startdate = datetime(2020, 8, 22, 15, 0, 0)
 test_enddate = datetime(2020, 8, 22, 15, 30, 0)
