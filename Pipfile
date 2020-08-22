@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 neovim = "*"
+black = "*"
 
 [packages]
 google-api-python-client = "*"
