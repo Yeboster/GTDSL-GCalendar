@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-    name='gcalendar',
-    version='0.0.4',
+    name='gtdsl-gcalendar',
+    version='0.0.4.1',
     description='An google calendar wrapper to integrate with the Getting Things Done framework.',
     url='https://github.com/GTDSL-GCalendar',
     author='Yeboster',
