@@ -24,7 +24,7 @@ for cal in calendar.get_calendars():
 # %%
 print("Add a test event at 21/8/2020")
 test_date = date(2020, 8, 21)
-calendar.insert_event('Test event', date=test_date,
+calendar.insert_event('Test event', start_date=test_date,
                       description="Test description")
 
 # %%

@@ -2,7 +2,7 @@ from os import getenv
 
 from dotenv import load_dotenv
 
-from lib.calendar import Calendar
+from gcalendar.gcalendar import GCalendar
 
 
 
@@ -10,8 +10,8 @@ from lib.calendar import Calendar
 if __name__ == '__main__':
     load_dotenv()
 
-    CALENDAR_ID = getenv('CALENDAR_ID')
-    TIMEZONE = getenv('TIMEZONE')
+    GCALENDAR_ID = getenv('GCALENDAR_ID')
+    GTIMEZONE = getenv('GTIMEZONE')
 
-    if CALENDAR_ID:
-        calendar = Calendar(CALENDAR_ID, TIMEZONE)
+    if GCALENDAR_ID:
+        gcalendar = GCalendar(GCALENDAR_ID, GTIMEZONE)

@@ -1,11 +1,11 @@
 from datetime import date, datetime, timedelta
-from typing import *
+from typing import Any, Dict, List, Tuple, Union
 
 from .authenticate import authenticate
 
 
 # Unfortunately Google Calendar API is a dynamic object, so no intelli-sense
-class Calendar:
+class GCalendar:
     """A wrapper to interact with Google Calendar"""
 
     def __init__(
@@ -42,7 +42,6 @@ class Calendar:
         """Insert event into calendar"""
         body: Dict[str, Any] = {}
         body["summary"] = title
-
         if start_date:
 
             def date_dict_of(date: Union[date, datetime]):
@@ -74,27 +73,21 @@ class Calendar:
         self,
         title: str,
         *,
-        date: date = None,
-        start_datetime: datetime = None,
-        end_datetime: datetime = None,
+        start_date: Union[date, datetime] = None,
+        end_date: Union[datetime, date] = None,
         description: str = None
     ) -> None:
         """Insert into calendar event with repeatition of 1 hour, 1 day, 1 week, 1 month"""
-        time_repetition = [1, 7, 30]
-
+        time_repetition = [1, 7, 31]
         recurring_dates: List[Tuple[Any, Any]] = []
-        if date:
-            recurring_dates += [
-                (date + timedelta(days=d), None) for d in time_repetition
-            ]
-        elif start_datetime:
-            # TODO: Check if recurringId can be used, to create recurring events
-            def add_to_endtime(**kwargs):
-                return end_datetime + timedelta(**kwargs) if end_datetime else None
 
-            recurring_dates += [(start_datetime, add_to_endtime(hours=1))]
+        if start_date:
+            def add_to_end_date(**kwargs):
+                return end_date + timedelta(**kwargs) if end_date else None
+
+            recurring_dates += [(start_date, add_to_end_date(hours=1))]
             recurring_dates += [
-                (start_datetime + timedelta(days=d), add_to_endtime(days=d))
+                (start_date + timedelta(days=d), add_to_end_date(days=d))
                 for d in time_repetition
             ]
         else:
