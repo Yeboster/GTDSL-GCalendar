@@ -9,27 +9,56 @@ class GCalendar:
     """A wrapper to interact with Google Calendar"""
 
     def __init__(
-        self, calendar_id: str, pickle_path: str = None, credentials_path: str = None, timezone: str = None
+        self,
+        calendar_id: str,
+        *,
+        pickle_path: str = None,
+        credentials_path: str = None,
+        timezone: str = None
     ) -> None:
-        self.service = authenticate(pickle_path=pickle_path, credentials_path=credentials_path)
+        self.service = authenticate(
+            pickle_path=pickle_path, credentials_path=credentials_path
+        )
         self.id = calendar_id
         self.timezone = timezone if timezone else "Europe/Rome"
 
     def get_calendars(self) -> List[Dict[str, Any]]:
         calendars = (
-            self.service.calendarList() # pylint: disable=maybe-no-member
+            self.service.calendarList()  # pylint: disable=maybe-no-member
             .list()
             .execute()
         )
 
         return calendars["items"]
 
-    def get_events(self) -> List[Dict[str, Any]]:
+    def get_events(self, *, not_before_days: int = None) -> List[Dict[str, Any]]:
+        """Return google events based on calendarId.
+        The range of events can be adjusted with "not_before_days"."""
+        iso = None
+        if not_before_days:
+            range = datetime.now() - timedelta(days=not_before_days)
+            iso = range.astimezone().isoformat()
         events = (
-            self.service.events().list().execute() # pylint: disable=maybe-no-member
+            self.service.events()  # pylint: disable=maybe-no-member
+            .list(calendarId=self.id, timeMin=iso)
+            .execute()
         )
 
         return events["items"]
+
+    def find_event_with(self, *, summary: str, not_before_days: int) -> Dict[str, Any]:
+        """Return event with similar or equal summary."""
+        found: Dict[str, Any] = None
+        for event in self.get_events(not_before_days=not_before_days):
+            if "summary" in event and event["summary"].find(summary) > -1:
+                found = event
+                break
+        return found
+
+    def delete_event(self, id: str):
+        self.service.events().delete(  # pylint: disable=maybe-no-member
+            calendarId=self.id, eventId=id
+        )
 
     def insert_event(
         self,
@@ -65,7 +94,7 @@ class GCalendar:
         if description:
             body["notes"] = description
 
-        self.service.events().insert( # pylint: disable=maybe-no-member
+        self.service.events().insert(  # pylint: disable=maybe-no-member
             calendarId=self.id, body=body
         ).execute()
 
@@ -82,6 +111,7 @@ class GCalendar:
         recurring_dates: List[Tuple[Any, Any]] = []
 
         if start_date:
+
             def add_to_end_date(**kwargs):
                 return end_date + timedelta(**kwargs) if end_date else None
 
