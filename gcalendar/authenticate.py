@@ -33,7 +33,8 @@ def authenticate(pickle_path: str = None, credentials_path: str = None):
                 credentials_path, SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open(pickle_path, 'wb') as token:
+        # Cannot use same path because secrets are read-only
+        with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
 
     return build('calendar', 'v3', credentials=creds)
