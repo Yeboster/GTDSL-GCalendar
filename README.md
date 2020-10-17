@@ -3,6 +3,7 @@
 ## Introduction
 
 A wrapper around Google calendar API with the focus of providing Getting Things Done friendly setup.
+This project is currently a module of [GTDSL-Notion](https://github.com/Yeboster/GTDSL-Notion) (A Notion implementation of GTD).
 
 ## Features
 - CRUD:
@@ -12,13 +13,17 @@ A wrapper around Google calendar API with the focus of providing Getting Things 
   - Delete event by title.
 
 ## Technologies
-Using Python 3.8
+The project is Python 3.8 and [Pipenv](https://pipenv.pypa.io/en/latest/) as dependency manager.
 
 In the near future it will be packed also as a micro-service (Docker & API support using Flask).
 
 ## Getting Started
 - Clone the repository;
-- Build the pip package by running `setup.py install`
+- Setup dependencies with Pipenv by running: `pipenv install`
+- Build the pip package by running 
+  ```shell
+  chmod +x setup.py && ./setup.py install
+  ```
 
 ## Contributing
 
