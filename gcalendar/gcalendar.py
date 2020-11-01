@@ -74,9 +74,11 @@ class GCalendar:
         return found
 
     def delete_event(self, id: str):
-        self.service.events().delete(  # pylint: disable=maybe-no-member
-            calendarId=self.id, eventId=id
-        ).execute()
+        return (
+            self.service.events()  # pylint: disable=maybe-no-member
+            .delete(calendarId=self.id, eventId=id)
+            .execute()
+        )
 
     def insert_event(
         self,
@@ -89,7 +91,7 @@ class GCalendar:
         """Insert event into calendar"""
         body: Dict[str, Any] = {}
         body["summary"] = title
-        if start_date:
+        if start_date and end_date:
 
             def date_dict_of(date: Union[date, datetime]):
                 iso = date.isoformat()
@@ -110,11 +112,13 @@ class GCalendar:
             raise Exception("No date was passed")
 
         if description:
-            body["notes"] = description
+            body["description"] = description
 
-        self.service.events().insert(  # pylint: disable=maybe-no-member
-            calendarId=self.id, body=body
-        ).execute()
+        return (
+            self.service.events()  # pylint: disable=maybe-no-member
+            .insert(calendarId=self.id, body=body)
+            .execute()
+        )
 
     def insert_time_repetition_event(
         self,

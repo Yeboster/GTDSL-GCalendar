@@ -1,13 +1,12 @@
+from datetime import datetime
 from typing import *
 from functools import wraps
-from flask import make_response
+from flask import make_response, json
 from flask.globals import request
 
-from flask.wrappers import Response
 from gcalendar.gcalendar import GCalendar
 from flask.app import Flask
 from flask import jsonify
-from werkzeug.utils import redirect
 
 
 api = Flask(__name__)
@@ -24,6 +23,18 @@ def json_response(obj):
     response.headers["content-type"] = "application/json"
 
     return response
+
+
+def success_response(obj):
+    res = {"status": "success", "data": obj}
+
+    return json_response(res)
+
+
+def error_response(message: str):
+    res = {"status": "error", "message": message}
+
+    return json_response(res)
 
 
 def gcalendar(f):
@@ -59,20 +70,40 @@ def events(gcalendar: GCalendar):
             try:
                 days_range = int(args.get("days_range"))
             except:
-                days_range = 30
+                return error_response("Cannot parse days_range")
         else:
             days_range = 30
 
-        response = gcalendar.find_events_with(
+        events = gcalendar.find_events_with(
             summary=summary, description=description, not_before_days=days_range
         )
     else:
-        response = gcalendar.get_events()
+        events = gcalendar.get_events()
 
-    return json_response(response)
+    return success_response(events)
 
 
 @api.route("/api/events", methods=["POST"])
 @gcalendar
 def insert_event(gcalendar: GCalendar):
-    pass
+    body = None
+    try:
+        body = json.loads(request.data)
+    except:
+        return error_response("Json not valid")
+
+    if body:
+        try:
+            title = body["title"]
+            start_date = datetime.fromisoformat(body["start_date"])
+            end_date = datetime.fromisoformat(body["end_date"])
+            description = body["description"] if "description" in body else None
+
+            event = gcalendar.insert_event(
+                title, start_date=start_date, end_date=end_date, description=description
+            )
+
+            return success_response(event)
+        except Exception as e:
+            message = str(e)
+            return error_response(f"Cannot insert event. Reason: {message}")
