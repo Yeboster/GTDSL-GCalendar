@@ -46,6 +46,15 @@ class GCalendar:
 
         return events["items"]
 
+    def get_event(self, id: str) -> Dict[str, Any]:
+        event = (
+            self.service.events()  # pylint: disable=maybe-no-member
+            .get(calendarId=self.id, eventId=id)
+            .execute()
+        )
+
+        return event
+
     def find_events_with(
         self, *, summary: str = None, description: str = None, not_before_days: int = 30
     ) -> List[Dict[str, Any]]:

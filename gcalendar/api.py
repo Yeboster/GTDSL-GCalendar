@@ -1,4 +1,5 @@
 from datetime import datetime
+from logging import error
 from typing import *
 from functools import wraps
 from flask import make_response, json
@@ -39,10 +40,10 @@ def error_response(message: str):
 
 def gcalendar(f):
     @wraps(f)
-    def decorator():
+    def decorator(*args, **kwargs):
         if "gcalendar" in api.config:
             gcalendar = api.config["gcalendar"]
-            return f(gcalendar)
+            return f(gcalendar, *args, **kwargs)
         else:
             return "Missing gcalendar in flask config"
 
@@ -83,6 +84,18 @@ def events(gcalendar: GCalendar):
     return success_response(events)
 
 
+@api.route("/api/events/<id>", methods=["GET"])
+@gcalendar
+def event(gcalendar: GCalendar, id: str):
+    try:
+        event = gcalendar.get_event(id)
+
+        return success_response(event)
+    except Exception as e:
+        message = str(e)
+        return error_response(f"Cannot get event. Reason: {message}")
+
+
 @api.route("/api/events", methods=["POST"])
 @gcalendar
 def insert_event(gcalendar: GCalendar):
@@ -116,18 +129,12 @@ def insert_event(gcalendar: GCalendar):
             return error_response(f"Cannot insert event. Reason: {message}")
 
 
-@api.route("/api/events", methods=["DELETE"])
+@api.route("/api/events/<id>", methods=["DELETE"])
 @gcalendar
-def delete_event(gcalendar: GCalendar):
-    args = request.args
-
-    if "id" in args:
-        id = args.get("id")
-        try:
-            res = gcalendar.delete_event(id)
-            return success_response(res)
-        except Exception as e:
-            message = str(e)
-            return error_response(f"Cannot delete event. Reason: {message}")
-    else:
-        return error_response("Missing id query param")
+def delete_event(gcalendar: GCalendar, id: str):
+    try:
+        res = gcalendar.delete_event(id)
+        return success_response(res)
+    except Exception as e:
+        message = str(e)
+        return error_response(f"Cannot delete event. Reason: {message}")
