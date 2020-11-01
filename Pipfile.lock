@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "842c2fe97e254d15b2367e8faabad085cb9947f52684b9598651c55d50cacc62"
+            "sha256": "4485a310e41e61ea208b419ab2149015ef98e40261e435f6849a1004546e49b8"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -101,13 +101,6 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
             "version": "==1.52.0"
-        },
-        "gtdsl-gcalendar": {
-            "path": ".",
-            "version": "==0.0.4.1"
-        },
-        "gtdsl.gcalendar": {
-            "path": "."
         },
         "httplib2": {
             "hashes": [

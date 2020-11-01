@@ -1,0 +1,14 @@
+version: "3.4"
+
+services:
+  gtdsl-gcalendar:
+    image: gtdsl-gcalendar
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file: .env
+    volumes:
+      - ./token.pickle:/app/token.pickle
+      - ./credentials.json:/app/credentials.json
+    ports:
+      - 5000:5000
