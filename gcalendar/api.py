@@ -47,20 +47,32 @@ def index(gcalendar: GCalendar):
     return body
 
 
-@api.route("/api/events")
+@api.route("/api/events", methods=["GET"])
 @gcalendar
 def events(gcalendar: GCalendar):
 
     args = request.args
-    if "summary" in args:
-        summary = args.get("summary")
+    if "summary" in args or "description" in args or "range_days" in args:
+        summary = args.get("summary") if "summary" in args else None
         description = args.get("description") if "description" in args else None
-        range_days = args.get("range_days") if "range_days" in args else 30
+        if "days_range" in args:
+            try:
+                days_range = int(args.get("days_range"))
+            except:
+                days_range = 30
+        else:
+            days_range = 30
 
         response = gcalendar.find_events_with(
-            summary=summary, description=description, not_before_days=range_days
+            summary=summary, description=description, not_before_days=days_range
         )
     else:
         response = gcalendar.get_events()
 
     return json_response(response)
+
+
+@api.route("/api/events", methods=["POST"])
+@gcalendar
+def insert_event(gcalendar: GCalendar):
+    pass
