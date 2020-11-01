@@ -47,14 +47,27 @@ class GCalendar:
         return events["items"]
 
     def find_events_with(
-        self, *, summary: str, not_before_days: int
+        self, *, summary: str = None, description: str = None, not_before_days: int
     ) -> List[Dict[str, Any]]:
         """Return event with similar or equal summary."""
         found: List[Dict[str, Any]] = []
         append = found.append
         for event in self.get_events(not_before_days=not_before_days):
-            if "summary" in event and event["summary"].find(summary) > -1:
+            in_summary = "summary" in event and event["summary"].find(summary) > -1
+
+            in_description = (
+                "description" in event and event["description"].find(description) > -1
+                if description
+                else False
+            )
+
+            if (
+                (summary and description and in_summary and in_description)
+                or in_summary
+                or in_description
+            ):
                 append(event)
+
         return found
 
     def delete_event(self, id: str):

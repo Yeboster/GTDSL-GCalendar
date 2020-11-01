@@ -1,6 +1,7 @@
 from typing import *
 from functools import wraps
 from flask import make_response
+from flask.globals import request
 
 from flask.wrappers import Response
 from gcalendar.gcalendar import GCalendar
@@ -39,7 +40,7 @@ def gcalendar(f):
 
 @api.route("/")
 @gcalendar
-def index(gcalendar: Optional[GCalendar]):
+def index(gcalendar: GCalendar):
 
     body = "Google calendar API wrapper"
 
@@ -48,8 +49,18 @@ def index(gcalendar: Optional[GCalendar]):
 
 @api.route("/api/events")
 @gcalendar
-def events(gcalendar: Optional[GCalendar]):
+def events(gcalendar: GCalendar):
 
-    response = gcalendar.get_events() if gcalendar else "Gcalendar not configured"
+    args = request.args
+    if "summary" in args:
+        summary = args.get("summary")
+        description = args.get("description") if "description" in args else None
+        range_days = args.get("range_days") if "range_days" in args else 30
+
+        response = gcalendar.find_events_with(
+            summary=summary, description=description, not_before_days=range_days
+        )
+    else:
+        response = gcalendar.get_events()
 
     return json_response(response)
