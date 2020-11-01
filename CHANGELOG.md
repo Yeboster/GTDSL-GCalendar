@@ -1,3 +1,9 @@
+# 0.1.0
+- General improvements
+- Get single event
+- Added flask api
+- Dockerized application
+
 # 0.0.6
 - Fix delete event action;
 - Return all found events.

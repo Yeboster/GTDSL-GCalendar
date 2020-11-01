@@ -46,21 +46,48 @@ class GCalendar:
 
         return events["items"]
 
+    def get_event(self, id: str) -> Dict[str, Any]:
+        event = (
+            self.service.events()  # pylint: disable=maybe-no-member
+            .get(calendarId=self.id, eventId=id)
+            .execute()
+        )
+
+        return event
+
     def find_events_with(
-        self, *, summary: str, not_before_days: int
+        self, *, summary: str = None, description: str = None, not_before_days: int = 30
     ) -> List[Dict[str, Any]]:
         """Return event with similar or equal summary."""
         found: List[Dict[str, Any]] = []
         append = found.append
         for event in self.get_events(not_before_days=not_before_days):
-            if "summary" in event and event["summary"].find(summary) > -1:
-                append(event)
+            in_summary = (
+                "summary" in event and event["summary"].find(summary) > -1
+                if summary
+                else False
+            )
+            in_description = (
+                "description" in event and event["description"].find(description) > -1
+                if description
+                else False
+            )
+
+            if summary and description:
+                if in_summary and in_description:
+                    append(event)
+            else:
+                if in_summary or in_description:
+                    append(event)
+
         return found
 
     def delete_event(self, id: str):
-        self.service.events().delete(  # pylint: disable=maybe-no-member
-            calendarId=self.id, eventId=id
-        ).execute()
+        return (
+            self.service.events()  # pylint: disable=maybe-no-member
+            .delete(calendarId=self.id, eventId=id)
+            .execute()
+        )
 
     def insert_event(
         self,
@@ -73,7 +100,7 @@ class GCalendar:
         """Insert event into calendar"""
         body: Dict[str, Any] = {}
         body["summary"] = title
-        if start_date:
+        if start_date and end_date:
 
             def date_dict_of(date: Union[date, datetime]):
                 iso = date.isoformat()
@@ -94,11 +121,13 @@ class GCalendar:
             raise Exception("No date was passed")
 
         if description:
-            body["notes"] = description
+            body["description"] = description
 
-        self.service.events().insert(  # pylint: disable=maybe-no-member
-            calendarId=self.id, body=body
-        ).execute()
+        return (
+            self.service.events()  # pylint: disable=maybe-no-member
+            .insert(calendarId=self.id, body=body)
+            .execute()
+        )
 
     def insert_time_repetition_event(
         self,

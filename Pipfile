@@ -5,14 +5,13 @@ verify_ssl = true
 
 [dev-packages]
 neovim = "*"
-setuptools = "*"
 
 [packages]
 google-api-python-client = "*"
 google-auth-httplib2 = "*"
 google-auth-oauthlib = "*"
 python-dotenv = "*"
-"gtdsl.gcalendar" = {path = "."}
+flask = "*"
 
 [requires]
 python_version = "3.8"
