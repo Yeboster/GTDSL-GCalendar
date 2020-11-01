@@ -99,7 +99,14 @@ def insert_event(gcalendar: GCalendar):
             end_date = datetime.fromisoformat(body["end_date"])
             description = body["description"] if "description" in body else None
 
-            event = gcalendar.insert_event(
+            args = request.args
+            insert_fun = (
+                gcalendar.insert_time_repetition_event
+                if "time_repetition" in args
+                else gcalendar.insert_event
+            )
+
+            event = insert_fun(
                 title, start_date=start_date, end_date=end_date, description=description
             )
 
@@ -107,3 +114,20 @@ def insert_event(gcalendar: GCalendar):
         except Exception as e:
             message = str(e)
             return error_response(f"Cannot insert event. Reason: {message}")
+
+
+@api.route("/api/events", methods=["DELETE"])
+@gcalendar
+def delete_event(gcalendar: GCalendar):
+    args = request.args
+
+    if "id" in args:
+        id = args.get("id")
+        try:
+            res = gcalendar.delete_event(id)
+            return success_response(res)
+        except Exception as e:
+            message = str(e)
+            return error_response(f"Cannot delete event. Reason: {message}")
+    else:
+        return error_response("Missing id query param")
