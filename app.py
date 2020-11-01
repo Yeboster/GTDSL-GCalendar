@@ -22,5 +22,5 @@ if __name__ == "__main__":
     else:
         logging.warn("[!] Missing envs")
 
-    # TODO: In production use WSGI
+    # In production use WGSI!
     app.run()

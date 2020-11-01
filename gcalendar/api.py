@@ -1,50 +1,48 @@
 from datetime import datetime
+import logging
+from os import getenv
+
+from dotenv.main import load_dotenv
+from .lib.utils import error_response, success_response
 from typing import *
 from functools import wraps
-from flask import make_response, json
+from flask import json
 from flask.globals import request
 
 from gcalendar.gcalendar import GCalendar
 from flask.app import Flask
-from flask import jsonify
 
 
 api = Flask(__name__)
 
 
-def configure(gcalendar: GCalendar) -> Flask:
-    api.config["gcalendar"] = gcalendar
+def configure(gcalendar: GCalendar = None) -> Flask:
+    if not gcalendar:
+        logging.warn("Trying to import gcalendar...")
+
+        load_dotenv()
+
+        GCALENDAR_ID = getenv("GCALENDAR_ID")
+        GTIMEZONE = getenv("GTIMEZONE")
+
+        gcalendar = GCalendar(GCALENDAR_ID, timezone=GTIMEZONE)
+
+    if gcalendar:
+        api.config["gcalendar"] = gcalendar
+    else:
+        raise Exception("Cannot configure gcalendar. (Probably missing some env)")
 
     return api
 
 
-def json_response(obj):
-    response = make_response(jsonify(obj), 200)
-    response.headers["content-type"] = "application/json"
-
-    return response
-
-
-def success_response(obj):
-    res = {"status": "success", "data": obj}
-
-    return json_response(res)
-
-
-def error_response(message: str):
-    res = {"status": "error", "message": message}
-
-    return json_response(res)
-
-
 def gcalendar(f):
     @wraps(f)
-    def decorator():
-        if "gcalendar" in api.config:
-            gcalendar = api.config["gcalendar"]
-            return f(gcalendar)
-        else:
-            return "Missing gcalendar in flask config"
+    def decorator(*args, **kwargs):
+        if not "gcalendar" in api.config:
+            configure()
+
+        gcalendar = api.config["gcalendar"]
+        return f(gcalendar, *args, **kwargs)
 
     return decorator
 
@@ -83,6 +81,18 @@ def events(gcalendar: GCalendar):
     return success_response(events)
 
 
+@api.route("/api/events/<id>", methods=["GET"])
+@gcalendar
+def event(gcalendar: GCalendar, id: str):
+    try:
+        event = gcalendar.get_event(id)
+
+        return success_response(event)
+    except Exception as e:
+        message = str(e)
+        return error_response(f"Cannot get event. Reason: {message}")
+
+
 @api.route("/api/events", methods=["POST"])
 @gcalendar
 def insert_event(gcalendar: GCalendar):
@@ -116,18 +126,12 @@ def insert_event(gcalendar: GCalendar):
             return error_response(f"Cannot insert event. Reason: {message}")
 
 
-@api.route("/api/events", methods=["DELETE"])
+@api.route("/api/events/<id>", methods=["DELETE"])
 @gcalendar
-def delete_event(gcalendar: GCalendar):
-    args = request.args
-
-    if "id" in args:
-        id = args.get("id")
-        try:
-            res = gcalendar.delete_event(id)
-            return success_response(res)
-        except Exception as e:
-            message = str(e)
-            return error_response(f"Cannot delete event. Reason: {message}")
-    else:
-        return error_response("Missing id query param")
+def delete_event(gcalendar: GCalendar, id: str):
+    try:
+        res = gcalendar.delete_event(id)
+        return success_response(res)
+    except Exception as e:
+        message = str(e)
+        return error_response(f"Cannot delete event. Reason: {message}")
